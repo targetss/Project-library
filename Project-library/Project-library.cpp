@@ -3,7 +3,7 @@
 #include<ctime>
 #include<Windows.h>
 #include<conio.h>
-//#include<cstdio>
+#include<fstream>
 
 #define DEBUG_ARRAY 0
 #define DEBUG_LIBRARY 1
@@ -551,13 +551,22 @@ private:
     friend void PrintBook(const Library& const value); //дружественная функция, доступны private поля вне класса
 };
 
+struct user
+{
+    char user[20];
+    char passwd[20];
+    int rights;
+};
+
 /* Прототипы функций */
 void SearchBook(Library* const, const char* const, int);
 bool SearchWordInPhrase(const char* const, const char* const);
 int CountElementInWord(const char*);
 void ShowCatalog(const Library* const, const int);
-void CheckPasswd();
-void JobMain();
+void CheckAuth(); //Проверка учетной записи для аутентификации
+void JobMain(); // Основная функция для меню
+void AddUser(); //Добавление учетной записи
+void EditRightsUser(); //Редактирование учетной записи
 
 template<typename T>
 void DeleteDynamicMemory(T* value)
@@ -589,7 +598,8 @@ int main(int argc, char* argv[])
 
 
 #if DEBUG_LIBRARY
-    CheckPasswd();
+    AddUser();
+    //CheckAuth();
     JobMain();
 
 #elif DEBUG_ARRAY
@@ -630,7 +640,9 @@ void JobMain()
         cout << "3 - Удаление книги из каталога" << endl;
         cout << "4 - Поиск книги в каталоге" << endl;
         cout << "5 - Показать каталог" << endl;
-
+#ifdef SA //Если у пользователя права s administrator
+        cout << "6 - Создать учетную запись" << endl;
+#endif
         std::cin >> val;
 
         switch (val)
@@ -695,7 +707,7 @@ void JobMain()
 
             break;
         case '4':
-            cin.ignore(cin.rdbuf()->in_avail()); //в потоке остаются символы '\n', поэтому тут надо почистить буфер
+            cin.ignore(cin.rdbuf()->in_avail()); //в буфере остаются символы '\n', поэтому тут надо почистить буфер
             char search_word[100];
             cout << "\x1B[2J\x1B[H"; //очистка консоли
             cout << "========Поиск книги========" << endl;
@@ -708,6 +720,9 @@ void JobMain()
         case '5':
             ShowCatalog(catalog, count_book);
             break;
+        case '6':
+
+            break;
         }
 
         //cin >> exx;
@@ -717,7 +732,7 @@ void JobMain()
     delete[] catalog;
 }
 
-void CheckPasswd()
+void CheckAuth()
 {
     // Виртуальное нажатие клавиш ALT+ENTER //
     keybd_event(VK_MENU, 0x38, 0, 0);
@@ -725,9 +740,26 @@ void CheckPasswd()
     keybd_event(VK_MENU, 0x38, KEYEVENTF_KEYUP, 0);
     keybd_event(VK_RETURN, 0x1c, KEYEVENTF_KEYUP, 0);
 
+    ofstream auth("C:\\Users\\admin\\Desktop\\c-plus_projects\\NProject_Library\\auth.dat", ios::binary);
+    //auth.open("C:\\Users\\admin\\Desktop\\c-plus_projects\\NProject_Library\\auth.txt");
     const char truepasswd[] = "qweASD123";
     char c[50];
     bool pswdcorrect = false;
+
+    user user1 = { "admin", "qweASD123", 1 };
+    user user2 = { "user1", "qweasd123", 0 };
+    user user3 = { "user2", "qweasd123", 0 };
+
+    auth.write((char*)&user1, sizeof(user));
+    auth.write((char*)&user2, sizeof(user));
+    auth.write((char*)&user3, sizeof(user));
+    auth.close();
+
+    //char buff[100];
+
+    //auth.getline(buff, sizeof(buff), '\n');
+
+    //cout << buff << endl << sizeof(buff);
 
     while (pswdcorrect != true)
     {
@@ -757,6 +789,68 @@ void CheckPasswd()
     }
     cout << "Password correct!" << endl;
     system("cls");
+}
+
+void EditRightsUser()
+{
+
+}
+
+void AddUser()
+{
+    user adduser{};
+    bool good = false;
+
+    do
+    {
+        char buf[20];
+        char buf2[20];
+        cout << "Введите имя пользователя: " << endl;
+        cin >> adduser.user;
+        EditRight:
+        cout << "Права пользователя:\n1 - Полные права\n2 - Редактирование каталога" << endl;
+        cin >> adduser.rights;
+        if (adduser.rights != 0 && adduser.rights != 1)
+        {
+            cout << "Некорректное значение для прав пользователя!" << endl;
+            goto EditRight;
+        }
+        cout << "Введите пароль:" << endl;
+        cin >> buf;
+        cout << "Введите пароль еще раз:" << endl;
+        cin >> buf2;
+
+        if (!strcmp(buf, buf2))
+        {
+            strcpy_s(adduser.passwd, sizeof(buf), buf);
+            good = true;
+        }
+        else
+        {
+            cout << "Пароли не совпадают!";
+        }
+    } while (!good);
+
+    ofstream auth("C:\\Users\\admin\\Desktop\\c-plus_projects\\NProject_Library\\auth.dat", ios::binary);
+
+    user user1 = { "admin", "qweASD123", 1 };
+    user user2 = { "user1", "qweasd1dafg23", 0 };
+    user user3 = { "u2", "qweasd123", 0 };
+    auth.write((char*)&user1, sizeof(user));
+    auth.write((char*)&user2, sizeof(user));
+    auth.write((char*)&user3, sizeof(user));
+    auth.close();
+
+    cout << "size u1 = " << sizeof(user1) << endl;
+    cout << "size u2 = " << sizeof(user2) << endl;
+    cout << "size u3 = " << sizeof(user3) << endl;
+
+    while(ar.g)
+    int cc = sizeof(auth);
+    cout << "sizeof = " << cc;
+
+    cout << "Учетная запись " << adduser.user << " успешно добавлена!";
+
 }
 
 void ShowCatalog(const Library* const value, const int count)
