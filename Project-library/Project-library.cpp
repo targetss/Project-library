@@ -7,7 +7,7 @@
 
 #define DEBUG_ARRAY 0
 #define DEBUG_LIBRARY 1
-
+#define USERDATA "C:\\Users\\Администратор\\Desktop\\c_project\\Project-library\\Project-libraryauth.dat"
 using namespace std;
 
 
@@ -598,7 +598,7 @@ int main(int argc, char* argv[])
 
 
 #if DEBUG_LIBRARY
-    AddUser();
+    CheckAuth();
     //CheckAuth();
     JobMain();
 
@@ -653,53 +653,53 @@ void JobMain()
             cout << "========Поступление книг========" << endl;
             cout << "Введите кол-во уникальных книг:" << endl;
 
-            std::cin >> count_book_add;
+std::cin >> count_book_add;
 
-            if (catalog == nullptr)
-            {
-                count_book = count_book_add;
+if (catalog == nullptr)
+{
+    count_book = count_book_add;
 
-                catalog = new Library[count_book];
+    catalog = new Library[count_book];
 
-                cout << catalog[0].GetCount();
-                for (int i = 0; i < count_book; i++)
-                {
-                    catalog[i].EditInformationBook();
-                }
+    cout << catalog[0].GetCount();
+    for (int i = 0; i < count_book; i++)
+    {
+        catalog[i].EditInformationBook();
+    }
 
-                //Library c = catalog[0] + catalog[1];
-                //cout << c.GetCount();
-            }
-            else
-            {
-                Library* temporary_catalog = new Library[count_book];
-                for (int i = 0; i < count_book; i++)
-                {
-                    temporary_catalog[i] = catalog[i];
-                }
+    //Library c = catalog[0] + catalog[1];
+    //cout << c.GetCount();
+}
+else
+{
+    Library* temporary_catalog = new Library[count_book];
+    for (int i = 0; i < count_book; i++)
+    {
+        temporary_catalog[i] = catalog[i];
+    }
 
-                delete[] catalog;
-                catalog = nullptr;
+    delete[] catalog;
+    catalog = nullptr;
 
-                Library* catalog = new Library[count_book_add + count_book];
-                count_book += count_book_add;
+    Library* catalog = new Library[count_book_add + count_book];
+    count_book += count_book_add;
 
-                for (int i = 0; i < count_book; i++)
-                {
-                    if (i < count_book - count_book_add)
-                    {
-                        catalog[i] = temporary_catalog[i];
-                    }
-                    else
-                    {
-                        catalog[i].EditInformationBook();
-                    }
-                }
-                delete[] temporary_catalog;
-                temporary_catalog = nullptr;
-            }
+    for (int i = 0; i < count_book; i++)
+    {
+        if (i < count_book - count_book_add)
+        {
+            catalog[i] = temporary_catalog[i];
+        }
+        else
+        {
+            catalog[i].EditInformationBook();
+        }
+    }
+    delete[] temporary_catalog;
+    temporary_catalog = nullptr;
+}
 
-            break;
+break;
         case '2':
 
             break;
@@ -721,7 +721,7 @@ void JobMain()
             ShowCatalog(catalog, count_book);
             break;
         case '6':
-
+            AddUser();
             break;
         }
 
@@ -740,41 +740,63 @@ void CheckAuth()
     keybd_event(VK_MENU, 0x38, KEYEVENTF_KEYUP, 0);
     keybd_event(VK_RETURN, 0x1c, KEYEVENTF_KEYUP, 0);
 
-    ofstream auth("C:\\Users\\admin\\Desktop\\c-plus_projects\\NProject_Library\\auth.dat", ios::binary);
-    //auth.open("C:\\Users\\admin\\Desktop\\c-plus_projects\\NProject_Library\\auth.txt");
-    const char truepasswd[] = "qweASD123";
-    char c[50];
-    bool pswdcorrect = false;
+    ifstream usr(USERDATA, ios::binary);
+    user us;
+    char buf[sizeof(us)];
+    bool correctdata = false;
+    int count_err = 0;
+    char users[20];
+    char pswd[20];
+    //bool pswdcorrect = false;
 
-    user user1 = { "admin", "qweASD123", 1 };
-    user user2 = { "user1", "qweasd123", 0 };
-    user user3 = { "user2", "qweasd123", 0 };
-
-    auth.write((char*)&user1, sizeof(user));
-    auth.write((char*)&user2, sizeof(user));
-    auth.write((char*)&user3, sizeof(user));
-    auth.close();
-
-    //char buff[100];
-
-    //auth.getline(buff, sizeof(buff), '\n');
-
-    //cout << buff << endl << sizeof(buff);
-
-    while (pswdcorrect != true)
+    while (correctdata != true)
     {
-        cout << "Введите пароль для входа:" << endl;
-        cin >> c;
-        if (!strcmp(truepasswd, c))
+        while (correctdata != true)
         {
-            pswdcorrect = true;
+            cout << "Логин: ";
+            cin >> users;
+            while (!usr.read((char*)&us, sizeof(us)).eof())
+            {
+                //!strcmp(us.user, users) ? correctdata = true : NULL;
+                cout << us.user << endl;
+            }
+            usr.seekg(0, usr.beg); //beg(begin) - вернуть в начало файла
+            if (correctdata == false)
+            {
+                cout << "Имя пользователя " << users << " не найдено! Попробуйте снова" << endl;
+            }
         }
-        else
+        correctdata = false;
+
+        while (!correctdata)
         {
-            cout << "Password incorrect!" << endl;
-            system("TIMEOUT /T 3 /NOBREAK");
-            system("cls");
+            cout << endl << "Пароль: " << endl;
+            cin >> pswd;
+            while (!usr.read((char*)&us, sizeof(us)).eof())
+            {
+                if (!strcmp(us.user, users))
+                {
+                    if (!strcmp(us.passwd, pswd))
+                    {
+                        correctdata = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!correctdata)
+            {
+                count_err++;
+                cout << "Password incorrect!" << endl;
+                system("TIMEOUT /T 3 /NOBREAK");
+                system("cls");
+                if (count_err > 5)
+                {
+                    system("exit");
+                }
+            }
         }
+      
         /*
         c = _getch();
         if (c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c >= 'A' && c <= 'Z')
@@ -788,6 +810,7 @@ void CheckAuth()
         }*/
     }
     cout << "Password correct!" << endl;
+    usr.close();
     system("cls");
 }
 
@@ -805,10 +828,34 @@ void AddUser()
     {
         char buf[20];
         char buf2[20];
+
+        addusr:
         cout << "Введите имя пользователя: " << endl;
         cin >> adduser.user;
+
+        ifstream readauthn(USERDATA, ios::binary);
+
+        user usr;
+        char usrbuf[sizeof(usr)];
+        bool existenceUser = false;
+        while (!readauthn.read((char*)&usr, sizeof(user)).eof())
+        {
+            if (!strcmp(adduser.user, usr.user))
+            {
+                existenceUser = true;
+            }
+        }
+        if (existenceUser)
+        {
+            cout << "Введенное имя пользователя уже используется!\nПопробуйте снова!" << endl;
+            system("TIMEOUT /T 3 /NOBREAK");
+            system("cls");
+            goto addusr;
+        }
+        readauthn.close();
+
         EditRight:
-        cout << "Права пользователя:\n1 - Полные права\n2 - Редактирование каталога" << endl;
+        cout << "Права пользователя:\n1 - Полные права\n0 - Редактирование каталога" << endl;
         cin >> adduser.rights;
         if (adduser.rights != 0 && adduser.rights != 1)
         {
@@ -831,25 +878,22 @@ void AddUser()
         }
     } while (!good);
 
-    ofstream auth("C:\\Users\\admin\\Desktop\\c-plus_projects\\NProject_Library\\auth.dat", ios::binary);
-
-    user user1 = { "admin", "qweASD123", 1 };
-    user user2 = { "user1", "qweasd1dafg23", 0 };
-    user user3 = { "u2", "qweasd123", 0 };
-    auth.write((char*)&user1, sizeof(user));
-    auth.write((char*)&user2, sizeof(user));
-    auth.write((char*)&user3, sizeof(user));
+    ofstream auth(USERDATA, ios::binary | ios::app);
+    auth.write((char*)&adduser, sizeof(user));
     auth.close();
-
-    cout << "size u1 = " << sizeof(user1) << endl;
-    cout << "size u2 = " << sizeof(user2) << endl;
-    cout << "size u3 = " << sizeof(user3) << endl;
-
-    while(ar.g)
-    int cc = sizeof(auth);
-    cout << "sizeof = " << cc;
+    
+    /*if (readauthn)
+    {
+        //Так мы получим кол-во байт в файле!!!
+        readauthn.seekg(0, readauthn.end);
+        int size = readauthn.tellg();
+        readauthn.seekg(0, readauthn.beg);
+        //Так мы получим кол-во байт в файле!!!
+    }*/
 
     cout << "Учетная запись " << adduser.user << " успешно добавлена!";
+    system("TIMEOUT /T 2 /NOBREAK");
+    system("cls");
 
 }
 
