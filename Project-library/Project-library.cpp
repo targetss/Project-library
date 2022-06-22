@@ -5,315 +5,9 @@
 #include<conio.h>
 #include<fstream>
 
-#define DEBUG_ARRAY 0
-#define DEBUG_LIBRARY 1
+#define SA 0
 #define USERDATA "C:\\Users\\admin\\Desktop\\c-plus_projects\\NProject_Library\\NProject_Library\\auth.dat"
 using namespace std;
-
-
-class Array
-{
-public:
-
-    Array(int count_sensor, int count_elem) : count_sensor(count_sensor), count_elem(count_elem), num_elem(0), time_now(time(NULL)), data(false)
-    {
-        arr = new int* [count_sensor];
-        for (int i = 0; i < count_sensor; i++)
-        {
-            arr[i] = new int[count_elem] {};
-        }
-
-    }
-
-    Array() : arr(nullptr), count_sensor(count_sensor), count_elem(count_elem), num_elem(0), time_now(time(NULL)), data(false)
-    {
-
-    }
-
-    bool UpdateAverageData()
-    {
-        if (this->data)
-        {
-            data = false;
-            return true;
-        }
-        return false;
-    }
-
-    void Update()
-    {
-        int tt = (time(NULL) - time_now);
-        if (tt > ((10 / count_elem)))
-        {
-            if (num_elem >= count_elem)
-            {
-                num_elem = 0;
-                data = true;
-            }
-            time_now = time(NULL);
-            for (int i = 0; i < count_sensor; i++)
-            {
-                arr[i][num_elem] = rand() % 10;
-            }
-            num_elem++;
-            ShowArray();
-        }
-
-    }
-
-    void ShowArray()
-    {
-        cout << "Array main:" << endl;
-        for (int i = 0; i < count_sensor; i++)
-        {
-            for (int j = 0; j < count_elem; j++)
-            {
-                cout << this->arr[i][j] << '\t';
-            }
-            cout << endl;
-        }
-    }
-
-    /// <summary>
-    /// Возвращает среднее значение со всех датчиков
-    /// </summary>
-    /// <returns>int - среднее значение со всех датчиков</returns>
-    int Average_value()
-    {
-        int count = 0;
-        for (int i = 0; i < count_sensor; i++)
-        {
-            for (int j = 0; j < count_elem; j++)
-            {
-                count += arr[i][j];
-            }
-        }
-        return count / (count_sensor + count_elem);
-    }
-
-    Array(const Array& other)
-    {
-        this->count_sensor = other.count_sensor;
-        this->count_elem = other.count_elem;
-        this->num_elem = other.num_elem;
-        this->time_now = other.time_now;
-        this->data = other.data;
-
-        this->arr = CreateArr();
-
-        for (int i = 0; i < this->count_sensor; i++)
-        {
-            for (int j = 0; j < this->count_elem; j++)
-            {
-                cout << "this arr = " << arr[i][j] << '\t' << "other.arr = " << arr[i][j] << endl;
-                this->arr[i][j] = other.arr[i][j];
-            }
-            cout << endl;
-        }
-    }
-
-    Array& operator = (const Array& other)
-    {
-        if (this->arr != nullptr)
-        {
-            for (int i = 0; i < count_sensor; i++)
-            {
-                delete[] this->arr[i];
-            }
-            delete[] this->arr;
-            arr = nullptr;
-        }
-
-        this->count_sensor = other.count_sensor;
-        this->count_elem = other.count_elem;
-        this->num_elem = other.num_elem;
-        this->time_now = other.time_now;
-        this->data = other.data;
-
-        this->arr = this->CreateArr();
-
-        for (int i = 0; i < count_sensor; i++)
-        {
-            for (int j = 0; j < count_elem; j++)
-            {
-                this->arr[i][j] = other.arr[i][j];
-            }
-        }
-
-        return *this;
-    }
-
-    Array operator + (const Array& other) //возвращается не ссылка потому что this это левый операнд, а other это правый и поэтому равняться будет новому объекту, который мы создаем в самом методе(временный)
-    {
-        Array temp;
-        if (this->count_elem == other.count_elem)
-        {
-            temp.count_sensor = this->count_sensor;
-            temp.count_elem = this->count_elem;
-            temp.num_elem = this->num_elem;
-            temp.time_now = this->time_now;
-            temp.data = this->data;
-
-            temp.arr = new int* [this->count_sensor];
-            for (int i = 0; i < count_sensor; i++)
-            {
-                temp.arr[i] = new int[count_elem];
-            }
-
-            for (int i = 0; i < count_sensor; i++)
-            {
-                for (int j = 0; j < count_elem; j++)
-                {
-                    temp.arr[i][j] = this->arr[i][j] + other.arr[i][j];
-                }
-            }
-        }
-        else
-        {
-            temp.count_sensor = this->count_sensor;
-            temp.count_elem = this->count_elem;
-            temp.num_elem = this->num_elem;
-            temp.time_now = this->time_now;
-            temp.data = this->data;
-
-            temp.arr = new int* [this->count_sensor];
-            for (int i = 0; i < count_sensor; i++)
-            {
-                temp.arr[i] = new int[count_elem];
-            }
-
-            for (int i = 0; i < count_sensor; i++)
-            {
-                for (int j = 0; j < count_elem; j++)
-                {
-                    temp.arr[i][j] = this->arr[i][j] + other.arr[i][j];
-                }
-            }
-        }
-        return temp;
-
-    }
-
-    Array& operator ++ () //префиксная инкремнт ++А
-    {
-        for (int i = 0; i < this->count_sensor; i++)
-        {
-            for (int j = 0; j < this->count_elem; j++)
-            {
-                arr[i][j]++;
-            }
-        }
-        return *this;
-    }
-
-    Array& operator ++(int value) //постфиксная, передаваемый параметр для отличия префикса от постфикса
-    {
-        Array temp(*this);
-
-        for (int i = 0; i < this->count_sensor; i++)
-        {
-            for (int j = 0; j < this->count_elem; j++)
-            {
-                arr[i][j]++;
-            }
-        }
-
-        return temp;
-    }
-
-    int*& operator [](int index1)
-    {
-        if (index1 >= 0 && index1 < count_sensor)
-        {
-            return arr[index1];
-        }
-        else
-        {
-            cout << "Error: вне границ массива" << endl;
-            //return NULL;
-        }
-    }
-
-    bool operator == (const Array& other)
-    {
-        bool equality = true;
-
-        if (this->count_sensor != other.count_sensor)
-        {
-            return false;
-        }
-
-        for (int i = 0; i < count_sensor; i++)
-        {
-            for (int j = 0; j < count_elem; j++)
-            {
-                this->arr[i][j] != other.arr[i][j] ? equality = false : NULL;
-                if (equality == false)
-                {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-
-    }
-
-    bool operator != (const Array& other)
-    {
-        bool equality = true;
-
-        if (this->count_sensor != other.count_sensor)
-        {
-            return true;
-        }
-
-        for (int i = 0; i < count_sensor; i++)
-        {
-            for (int j = 0; j < count_elem; j++)
-            {
-                this->arr[i][j] == other.arr[i][j] ? equality = false : equality = true;
-                if (equality == true)
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-
-    ~Array()
-    {
-        for (int i = 0; i < count_sensor; i++)
-        {
-            delete[] arr[i];
-        }
-        delete[] arr;
-        arr = nullptr;
-    }
-
-private:
-    int** arr;
-    int count_sensor; //Кол-во датчиков
-    int count_elem; //Кол-во обновлений в минуту, т.е кол-во элементов массива
-    int num_elem; //Колво заполненных элементов массива
-
-    int time_now;
-    bool data;
-
-    int** CreateArr()
-    {
-        arr = new int* [count_sensor] {};
-        for (int i = 0; i < count_sensor; i++)
-        {
-            arr[i] = new int[count_elem] {};
-        }
-
-        return arr;
-    }
-};
 
 class Library
 {
@@ -563,7 +257,7 @@ void SearchBook(Library* const, const char* const, int);
 bool SearchWordInPhrase(const char* const, const char* const);
 int CountElementInWord(const char*);
 void ShowCatalog(const Library* const, const int);
-void CheckAuth(); //Проверка учетной записи для аутентификации
+int CheckAuth(); //Проверка учетной записи для аутентификации
 void JobMain(); // Основная функция для меню
 void AddUser(); //Добавление учетной записи
 void EditRightsUser(); //Редактирование учетной записи
@@ -597,39 +291,20 @@ int main(int argc, char* argv[])
 
     srand(time(NULL));
 
-
-#if DEBUG_LIBRARY
     //AddUser();
-    CheckAuth();
+    //CheckAuth();
     JobMain();
-
-#elif DEBUG_ARRAY
-
-    Array ar1(2, 5);
-
-    Array ar2(2, 5);
-
-    Array ar3;
-    ar3 = ar1 + ar2;
-
-    cout << *ar3[5];
-
-    while (true)
-    {
-        ar1.Update();
-        if (ar1.UpdateAverageData())
-        {
-            cout << "Average count: " << ar1.Average_value() << endl;
-        }
-    }
-
-#endif
 
     return 0;
 }
 
 void JobMain()
 {
+
+    if (CheckAuth())
+    {
+        #define SA 1
+    }
     char val;
     //char exx;
     int count_book = 0; //общая сумма уникальных книг
@@ -643,6 +318,7 @@ void JobMain()
         cout << "5 - Показать каталог" << endl;
 #ifdef SA //Если у пользователя права s administrator
         cout << "6 - Создать учетную запись" << endl;
+        cout << "7 - Вывести список учетных записей" << endl;
 #endif
         std::cin >> val;
 
@@ -654,53 +330,50 @@ void JobMain()
             cout << "========Поступление книг========" << endl;
             cout << "Введите кол-во уникальных книг:" << endl;
 
-std::cin >> count_book_add;
+            std::cin >> count_book_add;
 
-if (catalog == nullptr)
-{
-    count_book = count_book_add;
+            if (catalog == nullptr)
+            {
+                count_book = count_book_add;
 
-    catalog = new Library[count_book];
+                catalog = new Library[count_book];
 
-    cout << catalog[0].GetCount();
-    for (int i = 0; i < count_book; i++)
-    {
-        catalog[i].EditInformationBook();
-    }
+                for (int i = 0; i < count_book; i++)
+                {
+                    catalog[i].EditInformationBook();
+                }
 
-    //Library c = catalog[0] + catalog[1];
-    //cout << c.GetCount();
-}
-else
-{
-    Library* temporary_catalog = new Library[count_book];
-    for (int i = 0; i < count_book; i++)
-    {
-        temporary_catalog[i] = catalog[i];
-    }
+            }
+            else
+            {
+                Library* temporary_catalog = new Library[count_book];
+                for (int i = 0; i < count_book; i++)
+                {
+                    temporary_catalog[i] = catalog[i];
+                }
 
-    delete[] catalog;
-    catalog = nullptr;
+                delete[] catalog;
+                catalog = nullptr;
 
-    Library* catalog = new Library[count_book_add + count_book];
-    count_book += count_book_add;
+                Library* catalog = new Library[count_book_add + count_book];
+                count_book += count_book_add;
 
-    for (int i = 0; i < count_book; i++)
-    {
-        if (i < count_book - count_book_add)
-        {
-            catalog[i] = temporary_catalog[i];
-        }
-        else
-        {
-            catalog[i].EditInformationBook();
-        }
-    }
-    delete[] temporary_catalog;
-    temporary_catalog = nullptr;
-}
+                for (int i = 0; i < count_book; i++)
+                {
+                    if (i < count_book - count_book_add)
+                    {
+                        catalog[i] = temporary_catalog[i];
+                    }
+                    else
+                    {
+                        catalog[i].EditInformationBook();
+                    }
+                }
+                delete[] temporary_catalog;
+                temporary_catalog = nullptr;
+            }
 
-break;
+            break;
         case '2':
 
             break;
@@ -721,9 +394,14 @@ break;
         case '5':
             ShowCatalog(catalog, count_book);
             break;
+#ifdef SA //Если у пользователя права s administrator
         case '6':
             AddUser();
             break;
+        case '7':
+            ShowListUsers();
+            break;
+#endif
         }
 
         //cin >> exx;
@@ -733,7 +411,7 @@ break;
     delete[] catalog;
 }
 
-void CheckAuth()
+int CheckAuth()
 {
     // Виртуальное нажатие клавиш ALT+ENTER //
     keybd_event(VK_MENU, 0x38, 0, 0);
@@ -802,6 +480,7 @@ void CheckAuth()
 
             if (strcmp(us.passwd, pswd))
             {
+                cout << us.passwd << endl;
                 count_err++;
                 cout << "Password incorrect!" << endl;
                 system("TIMEOUT /T 3 /NOBREAK");
@@ -817,7 +496,7 @@ void CheckAuth()
             else
             {
                 correctdata = true;
-                !correctauth;
+                correctauth = true;
             }
         }
       
@@ -836,6 +515,7 @@ void CheckAuth()
     //cout << "Password correct!" << endl;
     usr.close();
     system("cls");
+    return us.rights;
 }
 
 void EditRightsUser()
