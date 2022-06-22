@@ -7,7 +7,7 @@
 
 #define DEBUG_ARRAY 0
 #define DEBUG_LIBRARY 1
-#define USERDATA "C:\\Users\\Администратор\\Desktop\\c_project\\Project-library\\Project-libraryauth.dat"
+#define USERDATA "C:\\Users\\admin\\Desktop\\c-plus_projects\\NProject_Library\\NProject_Library\\auth.dat"
 using namespace std;
 
 
@@ -567,6 +567,7 @@ void CheckAuth(); //Проверка учетной записи для ауте
 void JobMain(); // Основная функция для меню
 void AddUser(); //Добавление учетной записи
 void EditRightsUser(); //Редактирование учетной записи
+void ShowListUsers(); //Просмотр всех учетных записей, только для админов
 
 template<typename T>
 void DeleteDynamicMemory(T* value)
@@ -598,8 +599,8 @@ int main(int argc, char* argv[])
 
 
 #if DEBUG_LIBRARY
+    //AddUser();
     CheckAuth();
-    //CheckAuth();
     JobMain();
 
 #elif DEBUG_ARRAY
@@ -743,57 +744,80 @@ void CheckAuth()
     ifstream usr(USERDATA, ios::binary);
     user us;
     char buf[sizeof(us)];
-    bool correctdata = false;
+    bool correctdata = false, correctauth = false;
     int count_err = 0;
     char users[20];
     char pswd[20];
-    //bool pswdcorrect = false;
-
-    while (correctdata != true)
+    int pos_login = 0; //проверяем на какой позиции стоит принятый логин
+    bool fg = true;
+    while (correctauth != true)
     {
         while (correctdata != true)
         {
             cout << "Логин: ";
             cin >> users;
-            while (!usr.read((char*)&us, sizeof(us)).eof())
-            {
-                //!strcmp(us.user, users) ? correctdata = true : NULL;
-                cout << us.user << endl;
-            }
+            //cout << "users = " << users << "\nsizeof = " << sizeof(users) << endl;
             usr.seekg(0, usr.beg); //beg(begin) - вернуть в начало файла
+            while (fg)
+            {
+                if (!usr.read((char*)&us, sizeof(user)).eof())
+                {
+                    //cout << "tellg = " << usr.tellg() << endl;
+                    if (!strcmp(us.user, users))
+                    {
+                        correctdata = true;
+                        //cout << "tellgtrue = " << usr.tellg() << endl;
+                        pos_login = (sizeof(user) / usr.tellg()) - 1;
+                        break;
+                    }                 
+                }
+                else
+                {
+                    fg = false;
+                }
+                
+            }
+            
+            usr.clear();
             if (correctdata == false)
             {
                 cout << "Имя пользователя " << users << " не найдено! Попробуйте снова" << endl;
+                fg = true;
             }
         }
         correctdata = false;
 
-        while (!correctdata)
+        while (correctdata == false)
         {
+            if (count_err > 0)
+            {
+                cout << "Password incorrect!" << endl;
+            }
             cout << endl << "Пароль: " << endl;
             cin >> pswd;
-            while (!usr.read((char*)&us, sizeof(us)).eof())
-            {
-                if (!strcmp(us.user, users))
-                {
-                    if (!strcmp(us.passwd, pswd))
-                    {
-                        correctdata = true;
-                        break;
-                    }
-                }
-            }
 
-            if (!correctdata)
+            // Чисто для самопонимания можно было бы найти пароль от юзера по его позиции
+            //usr.seekg(pos_login * sizeof(user));
+            //usr.read((char*)&us, sizeof(user));
+
+            if (strcmp(us.passwd, pswd))
             {
                 count_err++;
                 cout << "Password incorrect!" << endl;
                 system("TIMEOUT /T 3 /NOBREAK");
                 system("cls");
-                if (count_err > 5)
+                if (count_err >= 4)
                 {
-                    system("exit");
+                    cout << "Password incorrect!" << endl << "Программа будет закрыта!" << endl;
+                    system("TIMEOUT /T 2 /NOBREAK");
+                    keybd_event(VK_MENU, 0x12, 0, 0);
+                    keybd_event(VK_F4, 0x73, 0, 0);
                 }
+            }
+            else
+            {
+                correctdata = true;
+                !correctauth;
             }
         }
       
@@ -809,7 +833,7 @@ void CheckAuth()
             break;
         }*/
     }
-    cout << "Password correct!" << endl;
+    //cout << "Password correct!" << endl;
     usr.close();
     system("cls");
 }
@@ -894,6 +918,11 @@ void AddUser()
     cout << "Учетная запись " << adduser.user << " успешно добавлена!";
     system("TIMEOUT /T 2 /NOBREAK");
     system("cls");
+
+}
+
+void ShowListUsers()
+{
 
 }
 
