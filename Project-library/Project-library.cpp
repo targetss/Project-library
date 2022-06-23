@@ -262,6 +262,8 @@ void JobMain(); // Основная функция для меню
 void AddUser(); //Добавление учетной записи
 void EditRightsUser(); //Редактирование учетной записи
 void ShowListUsers(); //Просмотр всех учетных записей, только для админов
+void WorkUsers(); //Меню для работы с учетными записями
+void DeleteUser(); //Удаление учетной записи
 
 template<typename T>
 void DeleteDynamicMemory(T* value)
@@ -318,7 +320,7 @@ void JobMain()
         cout << "5 - Показать каталог" << endl;
 #ifdef SA //Если у пользователя права s administrator
         cout << "6 - Создать учетную запись" << endl;
-        cout << "7 - Вывести список учетных записей" << endl;
+        cout << "7 - Учетные данные" << endl;
 #endif
         std::cin >> val;
 
@@ -399,7 +401,7 @@ void JobMain()
             AddUser();
             break;
         case '7':
-            ShowListUsers();
+            WorkUsers();
             break;
 #endif
         }
@@ -604,6 +606,31 @@ void AddUser()
 void ShowListUsers()
 {
 
+}
+
+void WorkUsers()
+{
+    int value;
+    while (true)
+    {
+        cout << "======== Диспетчер учетных данных ========" << endl;
+        cout << "1 - Вывод учетных записей" << endl;
+        cout << "2 - Редактирование учетной записи" << endl;
+        cout << "3 - Удаление учетной записи" << endl;
+        cin >> value;
+        switch (value)
+        {
+        case '1':
+            ShowListUsers();
+            break;
+        case '2':
+            
+            break;
+        case '3':
+
+            break;
+        }
+    }
 }
 
 void ShowCatalog(const Library* const value, const int count)
