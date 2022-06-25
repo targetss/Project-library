@@ -4,7 +4,9 @@
 #include<Windows.h>
 #include<conio.h>
 #include<fstream>
-#include "library.h"
+#include "Visitor.h"
+#include "Library.h"
+
 
 #define SA 0
 #define USERDATA "C:\\Users\\Администратор\\Desktop\\c_project\\Project-library\\Project-libraryauth.dat"
@@ -68,18 +70,14 @@ int main(int argc, char* argv[])
 
 void JobMain()
 {
+    int role = CheckAuth();
 
-    if (CheckAuth())
-    {
-        #define SA 1
-    }
     char val;
     //char exx;
     int count_book = 0; //общая сумма уникальных книг
     Library* catalog = nullptr;
 
-    Library cat("qwe", "qwe", "qwe");
-    std::cout << cat.GetAuthor();
+    std::cout << string(100, ' ') << "Library" << endl;
 
     do {
         std::cout << "Введите:" << '\n' << "1 - Поступление новых книг" << endl;
@@ -87,10 +85,12 @@ void JobMain()
         std::cout << "3 - Удаление книги из каталога" << endl;
         std::cout << "4 - Поиск книги в каталоге" << endl;
         std::cout << "5 - Показать каталог" << endl;
-#ifdef SA //Если у пользователя права s administrator
-        std::cout << "6 - Создать учетную запись" << endl;
-        std::cout << "7 - Учетные данные" << endl;
-#endif
+        if (role)
+        {
+            std::cout << "6 - Создать учетную запись" << endl;
+            std::cout << "7 - Учетные данные" << endl;
+        } //Если у пользователя права s administrator
+
         std::cin >> val;
 
         switch (val)
@@ -113,7 +113,6 @@ void JobMain()
                 {
                     catalog[i].EditInformationBook();
                 }
-
             }
             else
             {
@@ -374,12 +373,25 @@ void AddUser()
 
 void ShowListUsers()
 {
+    system("cls");
+    ifstream read(USERDATA, std::ios::binary);
+    user usr;
 
+    std::cout << string(sizeof(user)+3, '=') << endl;
+    while(!read.read((char*)&usr, sizeof(user)).eof())
+    {
+        strlen(usr.user) % 2 == 0 ? std::cout << "|" << string((sizeof(usr.user) - strlen(usr.user)) / 2, ' ') << usr.user << string((sizeof(usr.user) - strlen(usr.user)) / 2, ' ') << "|" : std::cout << "|" << string((sizeof(usr.user) - strlen(usr.user)) / 2, ' ') << usr.user << string((sizeof(usr.user) - strlen(usr.user)) / 2+1, ' ') << "|";
+        strlen(usr.passwd) % 2 == 0 ? std::cout << string((sizeof(usr.passwd) - strlen(usr.passwd)) / 2, ' ') << usr.passwd << string((sizeof(usr.passwd) - strlen(usr.passwd)) / 2, ' ') << "|" : std::cout << string((sizeof(usr.passwd) - strlen(usr.passwd)) / 2, ' ') << usr.passwd << string((sizeof(usr.passwd) - strlen(usr.passwd)) / 2 + 1, ' ') << "|";
+        std::cout << string(1, ' ') << usr.rights << string(1, ' ') << "|" << endl;
+        std::cout << string(sizeof(user) + 3, '-') << endl;
+    }
+    std::cout << string(sizeof(user)+3, '=') << endl;
+    read.close();
 }
 
 void WorkUsers()
 {
-    int value;
+    char value;
     while (true)
     {
         std::cout << "======== Диспетчер учетных данных ========" << endl;
