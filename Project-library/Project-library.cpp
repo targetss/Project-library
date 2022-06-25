@@ -4,246 +4,12 @@
 #include<Windows.h>
 #include<conio.h>
 #include<fstream>
+#include "library.h"
 
 #define SA 0
-#define USERDATA "C:\\Users\\admin\\Desktop\\c-plus_projects\\NProject_Library\\NProject_Library\\auth.dat"
-using namespace std;
+#define USERDATA "C:\\Users\\Администратор\\Desktop\\c_project\\Project-library\\Project-libraryauth.dat"
 
-class Library
-{
-public:
-
-    Library() : name_(new char[70]{ "NoName" }), author_(new char[70]{ "NoAuthor" }), genre_(new char[70]{ "NoGenre" }), count(0), year(2000)
-    {
-        //cout << "Сработал конструктор, " << this << endl;
-    }
-
-
-    Library(const char* name, const char* genre, const char* author, int year = NULL, int count = 0)
-    {
-        strcpy_s(name_ = new char[strlen(name) + 1], strlen(name) + 1, name);
-        strcpy_s(genre_ = new char[strlen(genre) + 1], strlen(genre) + 1, genre);
-        (author == "") ? strcpy_s(author_ = new char[strlen(author) + 1], strlen(author) + 1, author) : strcpy_s(this->author_ = new char[strlen(author) + 1], strlen(author) + 1, author);;
-        (year == NULL) ? this->year = 0 : this->year = year;
-        this->count = count;
-    }
-
-    Library(const Library& other)
-    {
-        if (this->name_ != NULL && this->author_ != NULL && this->genre_ != NULL)
-        {
-            delete name_, author_, genre_;
-        }
-
-        strcpy_s(name_ = new char[CountElem(other.name_)], CountElem(other.name_), other.name_);
-        strcpy_s(author_ = new char[CountElem(other.author_)], CountElem(other.author_), other.author_);
-        strcpy_s(genre_ = new char[CountElem(other.genre_)], CountElem(other.genre_), other.genre_);
-        count = other.count;
-        year = other.year;
-
-        //cout << "Вызвался конструктор копирования" << this << endl;
-    }
-
-    char* GetAuthor()
-    {
-        return author_;
-    }
-
-    char* GetName()
-    {
-        return name_;
-    }
-
-    char* GetGenre()
-    {
-        return genre_;
-    }
-
-    int GetYear()
-    {
-        return year;
-    }
-
-    int GetCount()
-    {
-        return count;
-    }
-
-    Library& operator = (const Library& lb)
-    {
-        if (this->name_ != nullptr && this->author_ != nullptr && this->genre_ != nullptr)
-        {
-            //Удаляем динамическую память
-            delete[] this->name_;
-            delete[] this->author_;
-            delete[] this->genre_;
-        }
-
-        strcpy_s(this->name_ = new char[CountElem(lb.name_)], CountElem(lb.name_), lb.name_);
-        strcpy_s(this->author_ = new char[CountElem(lb.author_)], CountElem(lb.author_), lb.author_);
-        strcpy_s(this->genre_ = new char[CountElem(lb.genre_)], CountElem(lb.genre_), lb.genre_);
-        this->count = lb.count;
-        this->year = lb.year;
-        //cout << "Вызвалась перегрузка оператора \"=\"" << endl;
-        return *this;
-    }
-
-    bool operator == (const Library& other)
-    {
-        if (strcmp(other.name_, this->name_) + strcmp(other.author_, author_)
-            + strcmp(other.genre_, genre_) + (other.year != year)
-            + (other.count != count) == 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    bool operator != (const Library& other)
-    {
-        if (strcmp(other.name_, this->name_) + strcmp(other.author_, author_)
-            + strcmp(other.genre_, genre_) + (other.year != year)
-            + (other.count != count) == 1)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    Library& operator ++()
-    {
-        this->count++;
-        return *this;
-    }
-
-    Library& operator++ (int value)
-    {
-        Library temp(*this);
-
-        this->count++;
-
-        return temp;
-    }
-
-    Library operator + (const Library& other)
-    {
-        if (!strcmp(this->name_, other.name_)
-            && !strcmp(this->author_, other.author_)
-            && !strcmp(this->genre_, other.genre_)
-            && this->year == other.year)
-        {
-            Library temp(*this);
-            temp.count += other.count;
-            return temp;
-        }
-        else
-        {
-            cout << "Книги не идентичны" << endl;
-            return *this;
-        }
-    }
-
-    Library& operator + (int count)
-    {
-        this->count += count;
-        return *this;
-    }
-
-
-
-    void EditInformationBook()
-    {
-        cin.ignore(cin.rdbuf()->in_avail()); //в буфере остаются символы '\n', поэтому тут надо почистить буфер
-        char buf_name[100];
-        char buf_author[100];
-        char buf_genre[100];
-        int buf_year = NULL;
-        int buf_count = 0;
-
-        if (name_ == NULL && author_ == NULL && genre_ == NULL)
-        {
-            cout << "Редактирование данных книги: \"No name" << "\" \"No author\"" << endl;
-        }
-        else
-        {
-            cout << "Редактирование данных книги: \"" << name_ << "\", автор: " << author_ << endl;
-        }
-        cout << '\t' << "Нажмите Enter, если нужно сохранить значение.." << endl;
-        cout << "Название книги: ";
-        std::cin.getline(buf_name, 100, '\n');
-        cout << strlen(buf_name) << endl;
-        cout << "Жанр: ";
-        std::cin.getline(buf_genre, 100, '\n');
-        cout << endl;
-        cout << "Автор: ";
-        std::cin.getline(buf_author, 100, '\n');
-        cout << endl;
-        cout << "Год издания: ";
-        std::cin >> year;
-        cout << endl;
-        cout << "Количество на полке: ";
-        std::cin >> count;
-        cout << endl;
-
-        if (name_ == NULL && author_ == NULL && genre_ == NULL)
-        {
-            //delete name_, author_, genre_;
-            strcpy_s(this->name_ = new char[strlen(buf_name) + 1], strlen(buf_name) + 1, buf_name);
-            strcpy_s(this->author_ = new char[strlen(buf_author) + 1], strlen(buf_author) + 1, buf_author);
-            strcpy_s(this->genre_ = new char[strlen(buf_genre) + 1], strlen(buf_genre) + 1, buf_genre);
-        }
-        else
-        {
-            if (buf_name != "")
-            {
-                delete name_;
-                strcpy_s(this->name_ = new char[strlen(buf_name) + 1], strlen(buf_name) + 1, buf_name);
-            }
-
-            if (buf_author != "")
-            {
-                strcpy_s(this->author_ = new char[strlen(buf_author) + 1], strlen(buf_author) + 1, buf_author);
-            }
-
-            if (buf_genre != "")
-            {
-                strcpy_s(this->genre_ = new char[strlen(buf_genre) + 1], strlen(buf_genre) + 1, buf_genre);
-            }
-        }
-
-    }
-
-    ~Library()
-    {
-        //cout << "Сработал деструктор, " << this << endl;
-        delete name_, author_, genre_;
-    }
-private:
-
-    int CountElem(char* name)
-    {
-        int count = 0;
-        while (name[count] != '\0')
-        {
-            count++;
-        }
-        return ++count;
-    }
-
-    char* name_;
-    char* author_;
-    char* genre_;
-    int year;
-    int count;
-
-    friend void PrintBook(const Library& const value); //дружественная функция, доступны private поля вне класса
-};
+//using namespace std;
 
 struct user
 {
@@ -275,16 +41,16 @@ void DeleteDynamicMemory(T* value)
 
 void PrintBook(const Library& const value)
 {
-    cout << string(200, '=') << endl;
+    std::cout << string(200, '=') << endl;
 
-    cout << "|" << string((70 - CountElementInWord(value.name_) / 2), ' ') << value.name_ << string((70 - CountElementInWord(value.name_) / 2), ' ') << "|"
+    std::cout << "|" << string((70 - CountElementInWord(value.name_) / 2), ' ') << value.name_ << string((70 - CountElementInWord(value.name_) / 2), ' ') << "|"
         << string((70 - CountElementInWord(value.author_) / 2), ' ') << value.author_ << string((70 - CountElementInWord(value.author_) / 2), ' ') << "|"
         << string((70 - CountElementInWord(value.genre_) / 2), ' ') << value.genre_ << string((70 - CountElementInWord(value.genre_) / 2), ' ') << "|"
         << string((3), ' ') << value.year << string(3, ' ') << "|"
         << string((3), ' ') << value.count << string(3, ' ') << "|" << endl;
     //cout << "|\t" << value.name_ << "\t|\t" << value.author_ << "\t|\t" << value.genre_ << "\t|\t" << value.year << "\t|\t" << value.count << "\t|" << endl;
 
-    cout << string(72, '=') << endl;
+    std::cout << string(72, '=') << endl;
 }
 
 int main(int argc, char* argv[])
@@ -312,15 +78,18 @@ void JobMain()
     int count_book = 0; //общая сумма уникальных книг
     Library* catalog = nullptr;
 
+    Library cat("qwe", "qwe", "qwe");
+    std::cout << cat.GetAuthor();
+
     do {
-        cout << "Введите:" << '\n' << "1 - Поступление новых книг" << endl;
-        cout << "2 - Редактирование существующей книги" << endl;
-        cout << "3 - Удаление книги из каталога" << endl;
-        cout << "4 - Поиск книги в каталоге" << endl;
-        cout << "5 - Показать каталог" << endl;
+        std::cout << "Введите:" << '\n' << "1 - Поступление новых книг" << endl;
+        std::cout << "2 - Редактирование существующей книги" << endl;
+        std::cout << "3 - Удаление книги из каталога" << endl;
+        std::cout << "4 - Поиск книги в каталоге" << endl;
+        std::cout << "5 - Показать каталог" << endl;
 #ifdef SA //Если у пользователя права s administrator
-        cout << "6 - Создать учетную запись" << endl;
-        cout << "7 - Учетные данные" << endl;
+        std::cout << "6 - Создать учетную запись" << endl;
+        std::cout << "7 - Учетные данные" << endl;
 #endif
         std::cin >> val;
 
@@ -328,9 +97,9 @@ void JobMain()
         {
         case '1':
             int count_book_add;
-            cout << "\x1B[2J\x1B[H"; //очистка консоли
-            cout << "========Поступление книг========" << endl;
-            cout << "Введите кол-во уникальных книг:" << endl;
+            std::cout << "\x1B[2J\x1B[H"; //очистка консоли
+            std::cout << "========Поступление книг========" << endl;
+            std::cout << "Введите кол-во уникальных книг:" << endl;
 
             std::cin >> count_book_add;
 
@@ -383,12 +152,12 @@ void JobMain()
 
             break;
         case '4':
-            cin.ignore(cin.rdbuf()->in_avail()); //в буфере остаются символы '\n', поэтому тут надо почистить буфер
+            std::cin.ignore(cin.rdbuf()->in_avail()); //в буфере остаются символы '\n', поэтому тут надо почистить буфер
             char search_word[100];
-            cout << "\x1B[2J\x1B[H"; //очистка консоли
-            cout << "========Поиск книги========" << endl;
-            cout << "Введите ключевое слово для поиска:" << endl;
-            cin.getline(search_word, 100, '\n');
+            std::cout << "\x1B[2J\x1B[H"; //очистка консоли
+            std::cout << "========Поиск книги========" << endl;
+            std::cout << "Введите ключевое слово для поиска:" << endl;
+            std::cin.getline(search_word, 100, '\n');
 
             SearchBook(catalog, search_word, count_book);
 
@@ -434,8 +203,8 @@ int CheckAuth()
     {
         while (correctdata != true)
         {
-            cout << "Логин: ";
-            cin >> users;
+            std::cout << "Логин: ";
+            std::cin >> users;
             //cout << "users = " << users << "\nsizeof = " << sizeof(users) << endl;
             usr.seekg(0, usr.beg); //beg(begin) - вернуть в начало файла
             while (fg)
@@ -461,7 +230,7 @@ int CheckAuth()
             usr.clear();
             if (correctdata == false)
             {
-                cout << "Имя пользователя " << users << " не найдено! Попробуйте снова" << endl;
+                std::cout << "Имя пользователя " << users << " не найдено! Попробуйте снова" << endl;
                 fg = true;
             }
         }
@@ -471,10 +240,10 @@ int CheckAuth()
         {
             if (count_err > 0)
             {
-                cout << "Password incorrect!" << endl;
+                std::cout << "Password incorrect!" << endl;
             }
-            cout << endl << "Пароль: " << endl;
-            cin >> pswd;
+            std::cout << endl << "Пароль: " << endl;
+            std::cin >> pswd;
 
             // Чисто для самопонимания можно было бы найти пароль от юзера по его позиции
             //usr.seekg(pos_login * sizeof(user));
@@ -482,14 +251,14 @@ int CheckAuth()
 
             if (strcmp(us.passwd, pswd))
             {
-                cout << us.passwd << endl;
+                std::cout << us.passwd << endl;
                 count_err++;
-                cout << "Password incorrect!" << endl;
+                std::cout << "Password incorrect!" << endl;
                 system("TIMEOUT /T 3 /NOBREAK");
                 system("cls");
                 if (count_err >= 4)
                 {
-                    cout << "Password incorrect!" << endl << "Программа будет закрыта!" << endl;
+                    std::cout << "Password incorrect!" << endl << "Программа будет закрыта!" << endl;
                     system("TIMEOUT /T 2 /NOBREAK");
                     keybd_event(VK_MENU, 0x12, 0, 0);
                     keybd_event(VK_F4, 0x73, 0, 0);
@@ -536,8 +305,8 @@ void AddUser()
         char buf2[20];
 
         addusr:
-        cout << "Введите имя пользователя: " << endl;
-        cin >> adduser.user;
+        std::cout << "Введите имя пользователя: " << endl;
+        std::cin >> adduser.user;
 
         ifstream readauthn(USERDATA, ios::binary);
 
@@ -553,7 +322,7 @@ void AddUser()
         }
         if (existenceUser)
         {
-            cout << "Введенное имя пользователя уже используется!\nПопробуйте снова!" << endl;
+            std::cout << "Введенное имя пользователя уже используется!\nПопробуйте снова!" << endl;
             system("TIMEOUT /T 3 /NOBREAK");
             system("cls");
             goto addusr;
@@ -561,17 +330,17 @@ void AddUser()
         readauthn.close();
 
         EditRight:
-        cout << "Права пользователя:\n1 - Полные права\n0 - Редактирование каталога" << endl;
-        cin >> adduser.rights;
+        std::cout << "Права пользователя:\n1 - Полные права\n0 - Редактирование каталога" << endl;
+        std::cin >> adduser.rights;
         if (adduser.rights != 0 && adduser.rights != 1)
         {
-            cout << "Некорректное значение для прав пользователя!" << endl;
+            std::cout << "Некорректное значение для прав пользователя!" << endl;
             goto EditRight;
         }
-        cout << "Введите пароль:" << endl;
-        cin >> buf;
-        cout << "Введите пароль еще раз:" << endl;
-        cin >> buf2;
+        std::cout << "Введите пароль:" << endl;
+        std::cin >> buf;
+        std::cout << "Введите пароль еще раз:" << endl;
+        std::cin >> buf2;
 
         if (!strcmp(buf, buf2))
         {
@@ -580,7 +349,7 @@ void AddUser()
         }
         else
         {
-            cout << "Пароли не совпадают!";
+            std::cout << "Пароли не совпадают!";
         }
     } while (!good);
 
@@ -597,7 +366,7 @@ void AddUser()
         //Так мы получим кол-во байт в файле!!!
     }*/
 
-    cout << "Учетная запись " << adduser.user << " успешно добавлена!";
+    std::cout << "Учетная запись " << adduser.user << " успешно добавлена!";
     system("TIMEOUT /T 2 /NOBREAK");
     system("cls");
 
@@ -613,11 +382,11 @@ void WorkUsers()
     int value;
     while (true)
     {
-        cout << "======== Диспетчер учетных данных ========" << endl;
-        cout << "1 - Вывод учетных записей" << endl;
-        cout << "2 - Редактирование учетной записи" << endl;
-        cout << "3 - Удаление учетной записи" << endl;
-        cin >> value;
+        std::cout << "======== Диспетчер учетных данных ========" << endl;
+        std::cout << "1 - Вывод учетных записей" << endl;
+        std::cout << "2 - Редактирование учетной записи" << endl;
+        std::cout << "3 - Удаление учетной записи" << endl;
+        std::cin >> value;
         switch (value)
         {
         case '1':
@@ -647,7 +416,7 @@ void SearchBook(Library* const catalog, const char* const name, int count)
     {
         if (SearchWordInPhrase(name, catalog[i].GetName()) || SearchWordInPhrase(name, catalog[i].GetAuthor()) || SearchWordInPhrase(name, catalog[i].GetGenre()))
         {
-            cout << "Search good: № " << i << endl;
+            std::cout << "Search good: № " << i << endl;
         }
     }
 }
