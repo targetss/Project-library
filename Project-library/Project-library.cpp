@@ -447,7 +447,7 @@ void DeleteUser()
             user usr1;
             for (int i = count_usr; i < count; i++)
             {
-                wr.seekg(i*sizeof(user));
+                wr.seekg((i+1)*sizeof(user));
                 wr.read((char*)&usr1, sizeof(user));
                 wr.seekp(i * sizeof(user));
                 wr.write((char*)&usr1, sizeof(user));
