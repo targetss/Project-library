@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <stdio.h>
 #include<string>
 #include<ctime>
 #include<Windows.h>
@@ -28,7 +29,7 @@ void ShowCatalog(const Library* const, const int);
 int CheckAuth(); //Проверка учетной записи для аутентификации
 void JobMain(); // Основная функция для меню
 void AddUser(); //Добавление учетной записи
-void EditRightsUser(); //Редактирование учетной записи
+void EditAccountUser(); //Редактирование учетной записи
 void ShowListUsers(); //Просмотр всех учетных записей, только для админов
 void WorkUsers(); //Меню для работы с учетными записями
 void DeleteUser(); //Удаление учетной записи
@@ -288,7 +289,7 @@ int CheckAuth()
     return us.rights;
 }
 
-void EditRightsUser()
+void EditAccountUser()
 {
 
 }
@@ -373,19 +374,27 @@ void AddUser()
 
 void ShowListUsers()
 {
-    system("cls");
+    //system("cls");
     ifstream read(USERDATA, std::ios::binary);
     user usr;
 
-    std::cout << string(sizeof(user)+3, '=') << endl;
+    int count = 0; //кол-во учетных записей
+    int val = 0;
+
+    read.seekg(0, ios::end);
+    count = read.tellg() / sizeof(usr);
+    read.seekg(0, ios::beg);
+    
+    std::cout << string(sizeof(user)+5, '=') << endl;
     while(!read.read((char*)&usr, sizeof(user)).eof())
     {
-        strlen(usr.user) % 2 == 0 ? std::cout << "|" << string((sizeof(usr.user) - strlen(usr.user)) / 2, ' ') << usr.user << string((sizeof(usr.user) - strlen(usr.user)) / 2, ' ') << "|" : std::cout << "|" << string((sizeof(usr.user) - strlen(usr.user)) / 2, ' ') << usr.user << string((sizeof(usr.user) - strlen(usr.user)) / 2+1, ' ') << "|";
+        strlen(usr.user) % 2 == 0 ? std::cout << val << " |" << string((sizeof(usr.user) - strlen(usr.user)) / 2, ' ') << usr.user << string((sizeof(usr.user) - strlen(usr.user)) / 2, ' ') << "|" : std::cout << val << " |" << string((sizeof(usr.user) - strlen(usr.user)) / 2, ' ') << usr.user << string((sizeof(usr.user) - strlen(usr.user)) / 2+1, ' ') << "|";
         strlen(usr.passwd) % 2 == 0 ? std::cout << string((sizeof(usr.passwd) - strlen(usr.passwd)) / 2, ' ') << usr.passwd << string((sizeof(usr.passwd) - strlen(usr.passwd)) / 2, ' ') << "|" : std::cout << string((sizeof(usr.passwd) - strlen(usr.passwd)) / 2, ' ') << usr.passwd << string((sizeof(usr.passwd) - strlen(usr.passwd)) / 2 + 1, ' ') << "|";
         std::cout << string(1, ' ') << usr.rights << string(1, ' ') << "|" << endl;
-        std::cout << string(sizeof(user) + 3, '-') << endl;
+        std::cout << string(sizeof(user) + 5, '-') << endl;
+        val++;
     }
-    std::cout << string(sizeof(user)+3, '=') << endl;
+    //std::cout << "count = " << count << endl;
     read.close();
 }
 
@@ -405,13 +414,63 @@ void WorkUsers()
             ShowListUsers();
             break;
         case '2':
-            
+            EditAccountUser();
             break;
         case '3':
-
+            DeleteUser();
             break;
         }
     }
+}
+
+void DeleteUser()
+{
+    ifstream rd(USERDATA, ios::binary);
+    user usr;
+    rd.seekg(0, ios::end);
+    int count = rd.tellg() / sizeof(usr);
+    rd.close();
+
+    //fstream wr(USERDATA, ios::binary | ios::in | ios::out);
+
+    int count_usr;
+    while (true)
+    {
+        cout << "Введите порядковый номер учетной записи для удаления: ";
+        cin >> count_usr;
+        if (count_usr > 0 && count_usr < count)
+        {
+            cout << sizeof(user) * (count - 1)<< endl;
+            char* buf = new char[sizeof(user) * (count -1)];
+            fstream wr(USERDATA, ios::binary | ios::in | ios::out);
+            //wr.seekg(0, ios::end);
+            user usr1;
+            for (int i = count_usr; i < count; i++)
+            {
+                wr.seekg(i*sizeof(user));
+                wr.read((char*)&usr1, sizeof(user));
+                wr.seekp(i * sizeof(user));
+                wr.write((char*)&usr1, sizeof(user));
+                ShowListUsers();
+            }
+
+            int q = 0;
+            while (q != sizeof(user)*(count-1)+1) {
+                if (wr.eof()) break;
+                wr >> buf[q];
+                cout << "buf =" << buf[q] << " q=" << q << endl;
+                q++;
+            }
+            wr.close();
+
+            fstream wrr(USERDATA, ios::trunc | ios::binary);
+            wrr.write(buf, sizeof(user) * (count - 1));
+            wrr.close();
+            break;
+        }
+    }
+    cout << "good" << endl;
+    //wr.close();
 }
 
 void ShowCatalog(const Library* const value, const int count)
