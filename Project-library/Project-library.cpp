@@ -10,7 +10,8 @@
 
 
 #define SA 0
-#define USERDATA "C:\\Users\\Администратор\\Desktop\\c_project\\Project-library\\Project-libraryauth.dat"
+#define USERDATA "C:\\Users\\admin\\source\\repos\\targetss\\Project-library\\Project-library\\auth.dat"
+#define DEBUG 1
 
 //using namespace std;
 
@@ -71,6 +72,10 @@ int main(int argc, char* argv[])
 
 void JobMain()
 {
+#ifdef DEBUG
+    AddUser();
+#endif 
+
     int role = CheckAuth();
 
     char val;
@@ -310,24 +315,27 @@ void AddUser()
 
         ifstream readauthn(USERDATA, ios::binary);
 
-        user usr;
-        char usrbuf[sizeof(usr)];
-        bool existenceUser = false;
-        while (!readauthn.read((char*)&usr, sizeof(user)).eof())
+        if (readauthn)
         {
-            if (!strcmp(adduser.user, usr.user))
+            user usr;
+            char usrbuf[sizeof(usr)];
+            bool existenceUser = false;
+            while (!readauthn.read((char*)&usr, sizeof(user)).eof())
             {
-                existenceUser = true;
+                if (!strcmp(adduser.user, usr.user))
+                {
+                    existenceUser = true;
+                }
+            }
+            if (existenceUser)
+            {
+                std::cout << "Введенное имя пользователя уже используется!\nПопробуйте снова!" << endl;
+                system("TIMEOUT /T 3 /NOBREAK");
+                system("cls");
+                readauthn.close();
+                goto addusr;
             }
         }
-        if (existenceUser)
-        {
-            std::cout << "Введенное имя пользователя уже используется!\nПопробуйте снова!" << endl;
-            system("TIMEOUT /T 3 /NOBREAK");
-            system("cls");
-            goto addusr;
-        }
-        readauthn.close();
 
         EditRight:
         std::cout << "Права пользователя:\n1 - Полные права\n0 - Редактирование каталога" << endl;
@@ -350,7 +358,7 @@ void AddUser()
         else
         {
             std::cout << "Пароли не совпадают!";
-        }
+        }      
     } while (!good);
 
     ofstream auth(USERDATA, ios::binary | ios::app);
