@@ -442,41 +442,40 @@ void DeleteUser()
     //fstream wr(USERDATA, ios::binary | ios::in | ios::out);
 
     int count_usr;
-    while (true)
+    cout << "Введите порядковый номер учетной записи для удаления: ";
+    cin >> count_usr;
+    if (count_usr >= 0 && count_usr < count)
     {
-        cout << "Введите порядковый номер учетной записи для удаления: ";
-        cin >> count_usr;
-        if (count_usr > 0 && count_usr < count)
+        cout << sizeof(user) * (count - 1)<< endl;
+        char* buf = new char[sizeof(user) * (count -1)];
+        fstream wr(USERDATA, ios::binary | ios::in | ios::out);
+        //wr.seekg(0, ios::end);
+        user usr1;
+        for (int i = count_usr; i < count; i++)
         {
-            cout << sizeof(user) * (count - 1)<< endl;
-            char* buf = new char[sizeof(user) * (count -1)];
-            fstream wr(USERDATA, ios::binary | ios::in | ios::out);
-            //wr.seekg(0, ios::end);
-            user usr1;
-            for (int i = count_usr; i < count; i++)
-            {
-                wr.seekg((i+1)*sizeof(user));
-                wr.read((char*)&usr1, sizeof(user));
-                wr.seekp(i * sizeof(user));
-                wr.write((char*)&usr1, sizeof(user));
-                ShowListUsers();
-            }
-
-            int q = 0;
-            while (q != sizeof(user)*(count-1)+1) {
-                if (wr.eof()) break;
-                wr >> buf[q];
-                cout << "buf =" << buf[q] << " q=" << q << endl;
-                q++;
-            }
-            wr.close();
-
-            fstream wrr(USERDATA, ios::trunc | ios::binary);
-            wrr.write(buf, sizeof(user) * (count - 1));
-            wrr.close();
-            break;
+            wr.seekg((i+1)*sizeof(user));
+            wr.read((char*)&usr1, sizeof(user));
+            wr.seekp(i * sizeof(user));
+            wr.write((char*)&usr1, sizeof(user));
+            ShowListUsers();
         }
+
+        int q = 0;
+        while (q != sizeof(user)*(count-1)+1) {
+            cout << "dfgasfg" << endl;
+            if (wr.eof()) break;
+            wr >> buf[q];
+            cout << "buf =" << buf[q] << " q=" << q << endl;
+            q++;
+        }
+        wr.close();
+
+        fstream wrr(USERDATA, ios::trunc | ios::binary);
+        wrr.write(buf, sizeof(user) * (count - 1));
+        wrr.close();
+        break;
     }
+
     cout << "good" << endl;
     //wr.close();
 }
