@@ -434,50 +434,44 @@ void WorkUsers()
 void DeleteUser()
 {
     ifstream rd(USERDATA, ios::binary);
-    user usr;
     rd.seekg(0, ios::end);
-    int count = rd.tellg() / sizeof(usr);
+    int count = rd.tellg() / sizeof(user);
     rd.close();
-
-    //fstream wr(USERDATA, ios::binary | ios::in | ios::out);
 
     int count_usr;
     cout << "Введите порядковый номер учетной записи для удаления: ";
     cin >> count_usr;
     if (count_usr >= 0 && count_usr < count)
     {
-        cout << sizeof(user) * (count - 1)<< endl;
         char* buf = new char[sizeof(user) * (count -1)];
         fstream wr(USERDATA, ios::binary | ios::in | ios::out);
-        //wr.seekg(0, ios::end);
+        wr.seekg(0, ios::beg);
         user usr1;
-        for (int i = count_usr; i < count; i++)
-        {
-            wr.seekg((i+1)*sizeof(user));
-            wr.read((char*)&usr1, sizeof(user));
-            wr.seekp(i * sizeof(user));
-            wr.write((char*)&usr1, sizeof(user));
-            ShowListUsers();
-        }
 
-        int q = 0;
-        while (q != sizeof(user)*(count-1)+1) {
-            cout << "dfgasfg" << endl;
+        int w = 0, s = 0;
+        while (true)
+        {
             if (wr.eof()) break;
-            wr >> buf[q];
-            cout << "buf =" << buf[q] << " q=" << q << endl;
-            q++;
+            if (s >= sizeof(user) * count_usr && s < sizeof(user) * (count_usr + 1))
+            {
+                s++;
+                wr.seekg(sizeof(user) * (count_usr + 1));
+                continue;
+            }
+            wr >> buf[w];
+            cout << buf[w];
+            w++;
+            s++;
         }
         wr.close();
 
-        fstream wrr(USERDATA, ios::trunc | ios::binary);
+        fstream wrr(USERDATA, ios::out | ios::binary);
         wrr.write(buf, sizeof(user) * (count - 1));
         wrr.close();
-        break;
-    }
 
-    cout << "good" << endl;
-    //wr.close();
+        delete[] buf;
+        buf = nullptr;
+    }
 }
 
 void ShowCatalog(const Library* const value, const int count)
