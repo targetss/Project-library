@@ -77,15 +77,16 @@ void JobMain()
 #endif 
 
     int role = CheckAuth();
-
+ 
     char val;
     //char exx;
     int count_book = 0; //общая сумма уникальных книг
     Library* catalog = nullptr;
 
-    std::cout << string(100, ' ') << "Library" << endl;
-
     do {
+        system("cls");
+        std::cout << string(100, ' ') << "Library" << endl;
+
         std::cout << "Введите:" << '\n' << "1 - Поступление новых книг" << endl;
         std::cout << "2 - Редактирование существующей книги" << endl;
         std::cout << "3 - Удаление книги из каталога" << endl;
@@ -296,6 +297,36 @@ int CheckAuth()
 
 void EditAccountUser()
 {
+    int num;
+    user usr;
+    char pswd[sizeof(usr.passwd)]{};
+
+    ShowListUsers();
+
+    std::cout << "Введите номер учетной записи для смены пароля: ";
+    std::cin >> num;
+    cin.ignore(cin.rdbuf()->in_avail());
+
+    fstream read(USERDATA, ios::binary | ios::in | ios::out);
+    read.seekg(sizeof(user) * num);
+    read.read((char*)&usr, sizeof(user));
+    
+    renewpswd:
+    std::cout << "Введите новый пароль: ";
+    std::cin.getline(usr.passwd, sizeof(usr.passwd), '\n');
+    std::cout << std::endl << "Подтвердите пароль: ";
+    std::cin.getline(pswd, sizeof(usr.passwd), '\n');
+    if (!strcmp(usr.passwd, pswd))
+    {
+        std::cout << "Пароль изменен!";
+        read.seekp(sizeof(user) * num);
+        read.write((char*)&usr, sizeof(user));
+    }
+    else {
+        std::cout << "Пароли не совпадают!" << std::endl;
+        goto renewpswd;
+    }
+    read.close();
 
 }
 
@@ -408,13 +439,14 @@ void ShowListUsers()
 
 void WorkUsers()
 {
-    char value;
-    while (true)
+    char value, exit = 'n';
+    while (exit!='e')
     {
         std::cout << "======== Диспетчер учетных данных ========" << endl;
-        std::cout << "1 - Вывод учетных записей" << endl;
-        std::cout << "2 - Редактирование учетной записи" << endl;
+        std::cout << "1 - Просмотр учетных записей" << endl;
+        std::cout << "2 - Смена пароля учетной записи" << endl;
         std::cout << "3 - Удаление учетной записи" << endl;
+        std::cout << "4 - Выход" << endl;
         std::cin >> value;
         switch (value)
         {
@@ -426,6 +458,9 @@ void WorkUsers()
             break;
         case '3':
             DeleteUser();
+            break;
+        case '4':
+            exit = 'e';
             break;
         }
     }
