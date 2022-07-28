@@ -1,0 +1,5 @@
+[2022.7.28 17:29:12] Authorization. Authorization user account: "evgeniy";
+[2022.7.28 17:30:56] Authorization. Incorrect password user "qwe";
+[2022.7.28 17:37:20] Authorization. Authorization user account: "evgeniy";
+[2022.7.28 17:51:27] Authorization. Authorization user account: "qw";
+[2022.7.28 17:55:38] Authorization. Authorization user account: "qw";

@@ -11,6 +11,7 @@
 
 #define SA 0
 #define USERDATA "C:\\Users\\admin\\source\\repos\\targetss\\Project-library\\Project-library\\auth.dat"
+#define LOGFILE "C:\\Users\\admin\\source\\repos\\targetss\\Project-library\\Project-library\\logfile.txt"
 #define DEBUG 1
 
 //using namespace std;
@@ -45,11 +46,12 @@ void DeleteDynamicMemory(T* value)
 
 void PrintBook(const Library& const value)
 {
-    std::cout << string(200, '=') << endl;
+    Library lb;
+    std::cout << string(sizeof(value.name_)+sizeof(value.author_)+sizeof(value.genre_), '=') << endl;
 
-    std::cout << "|" << string((70 - CountElementInWord(value.name_) / 2), ' ') << value.name_ << string((70 - CountElementInWord(value.name_) / 2), ' ') << "|"
-        << string((70 - CountElementInWord(value.author_) / 2), ' ') << value.author_ << string((70 - CountElementInWord(value.author_) / 2), ' ') << "|"
-        << string((70 - CountElementInWord(value.genre_) / 2), ' ') << value.genre_ << string((70 - CountElementInWord(value.genre_) / 2), ' ') << "|"
+    std::cout << "|" << string((sizeof(lb.name_) - CountElementInWord(value.name_) / 2), ' ') << value.name_ << string((sizeof(lb.name_) - CountElementInWord(value.name_) / 2), ' ') << "|"
+        << string((sizeof(lb.author_) - CountElementInWord(value.author_) / 2), ' ') << value.author_ << string((sizeof(lb.author_) - CountElementInWord(value.author_) / 2), ' ') << "|"
+        << string((sizeof(lb.genre_) - CountElementInWord(value.genre_) / 2), ' ') << value.genre_ << string((sizeof(lb.genre_) - CountElementInWord(value.genre_) / 2), ' ') << "|"
         << string((3), ' ') << value.year << string(3, ' ') << "|"
         << string((3), ' ') << value.count << string(3, ' ') << "|" << endl;
     //cout << "|\t" << value.name_ << "\t|\t" << value.author_ << "\t|\t" << value.genre_ << "\t|\t" << value.year << "\t|\t" << value.count << "\t|" << endl;
@@ -197,6 +199,7 @@ int CheckAuth()
     keybd_event(VK_RETURN, 0x1c, KEYEVENTF_KEYUP, 0);
 
     ifstream usr(USERDATA, ios::binary);
+    ofstream log(LOGFILE, ios::app);
     user us;
     char buf[sizeof(us)];
     bool correctdata = false, correctauth = false;
@@ -260,12 +263,18 @@ int CheckAuth()
                 std::cout << us.passwd << endl;
                 count_err++;
                 std::cout << "Password incorrect!" << endl;
-                system("TIMEOUT /T 3 /NOBREAK");
+                system("TIMEOUT /T 1 /NOBREAK");
                 system("cls");
                 if (count_err >= 4)
                 {
-                    std::cout << "Password incorrect!" << endl << "Программа будет закрыта!" << endl;
-                    system("TIMEOUT /T 2 /NOBREAK");
+                    time_t time_log = time(NULL);
+                    tm lg;
+                    localtime_s(&lg, &time_log);
+                    log << '[' << 1900 + lg.tm_year << "." << 1+ lg.tm_mon << "." << lg.tm_mday << " " << lg.tm_hour <<":"<<lg.tm_min<<":"<<lg.tm_sec<<"] ";
+                    log << "Authorization. Incorrect password user \"" << us.user << "\";" << '\n';
+                    log.close();
+                    std::cout << "Не верный пароль!" << endl << "Программа будет закрыта!" << endl;
+                    system("TIMEOUT /T 1 /NOBREAK");
                     keybd_event(VK_MENU, 0x12, 0, 0);
                     keybd_event(VK_F4, 0x73, 0, 0);
                 }
@@ -290,6 +299,13 @@ int CheckAuth()
         }*/
     }
     //cout << "Password correct!" << endl;
+    time_t time_log = time(NULL);
+    tm lg;
+    localtime_s(&lg, &time_log);
+    log << '[' << 1900 + lg.tm_year << "." << 1 + lg.tm_mon << "." << lg.tm_mday << " " << lg.tm_hour << ":" << lg.tm_min << ":" << lg.tm_sec << "] ";
+    log << "Authorization. Authorization user account: \"" << us.user << "\";" << '\n';
+    log.close();
+
     usr.close();
     system("cls");
     return us.rights;
@@ -515,6 +531,13 @@ void ShowCatalog(const Library* const value, const int count)
     {
         PrintBook(value[i]);
     }
+    char ex = 0;
+    while (ex != '0')
+    {
+        cout << "0 - Выход в главное меню" << endl;
+        cin >> ex;
+    }
+
 }
 
 void SearchBook(Library* const catalog, const char* const name, int count)
