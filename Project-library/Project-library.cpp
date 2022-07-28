@@ -49,9 +49,9 @@ void PrintBook(const Library& const value)
     Library lb;
     std::cout << string(sizeof(value.name_)+sizeof(value.author_)+sizeof(value.genre_), '=') << endl;
 
-    std::cout << "|" << string(CountElementInWord(value.name_) / 2), ' ') << value.name_ << string((sizeof(lb.name_) - CountElementInWord(value.name_) / 2), ' ') << "|"
-        << string((sizeof(lb.author_) - CountElementInWord(value.author_) / 2), ' ') << value.author_ << string((sizeof(lb.author_) - CountElementInWord(value.author_) / 2), ' ') << "|"
-        << string((sizeof(lb.genre_) - CountElementInWord(value.genre_) / 2), ' ') << value.genre_ << string((sizeof(lb.genre_) - CountElementInWord(value.genre_) / 2), ' ') << "|"
+    std::cout << "|" << string((25 -(CountElementInWord(value.name_)) / 2), ' ') << value.name_ << string((30 - CountElementInWord(value.name_) / 2), ' ') << "|"
+        << string((25 - CountElementInWord(value.author_) / 2), ' ') << value.author_ << string((25 - CountElementInWord(value.author_) / 2), ' ') << "|"
+        << string((25 - CountElementInWord(value.genre_) / 2), ' ') << value.genre_ << string((25 - CountElementInWord(value.genre_) / 2), ' ') << "|"
         << string((3), ' ') << value.year << string(3, ' ') << "|"
         << string((3), ' ') << value.count << string(3, ' ') << "|" << endl;
     //cout << "|\t" << value.name_ << "\t|\t" << value.author_ << "\t|\t" << value.genre_ << "\t|\t" << value.year << "\t|\t" << value.count << "\t|" << endl;
