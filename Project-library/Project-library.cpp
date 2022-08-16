@@ -10,8 +10,8 @@
 
 
 #define SA 0
-#define USERDATA "C:\\Users\\admin\\source\\repos\\targetss\\Project-library\\Project-library\\auth.dat"
-#define LOGFILE "C:\\Users\\admin\\source\\repos\\targetss\\Project-library\\Project-library\\logfile.txt"
+#define USERDATA "C:\\Users\\Администратор\\Desktop\\c_project\\Project-library\\Project-library\\auth.dat"
+#define LOGFILE "C:\\Users\\Администратор\\Desktop\\c_project\\Project-library\\Project-library\\logfile.txt"
 #define DEBUG 1
 
 //using namespace std;
